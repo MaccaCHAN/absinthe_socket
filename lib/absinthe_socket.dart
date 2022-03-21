@@ -1,5 +1,7 @@
 library absinthe_socket;
 
+import 'dart:async';
+
 import 'package:phoenix_wings/phoenix_wings.dart';
 
 /// An Absinthe Socket
@@ -155,23 +157,26 @@ class Notifier<Result> {
   }
 
   void notify(Map result) {
-    observers.forEach((Observer observer) => observer.onResult(result));
+
+    observers.forEach((Observer observer) => observer.onResult != null ? observer.onResult!(result) : null );
   }
 
   void cancel() {
-    observers.forEach((Observer observer) => observer.onCancel());
+    observers.forEach((Observer observer) =>observer.onCancel != null ?  observer.onCancel!() : null);
   }
 }
 
+late StreamController hi;
+
 class Observer<Result> {
-  Function onAbort;
-  Function onCancel;
-  Function onError;
-  Function onStart;
-  Function onResult;
+  Function? onAbort;
+  Function? onCancel;
+  Function? onError;
+  Function? onStart;
+  Function? onResult;
 
   Observer(
-      {required this.onAbort, required this.onCancel, required this.onError, required this.onStart, required this.onResult});
+      {this.onAbort, this.onCancel, this.onError, this.onStart, this.onResult});
 }
 
 class GqlRequest {
