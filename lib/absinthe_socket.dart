@@ -148,7 +148,7 @@ class AbsintheSocketOptions {
 class Notifier<Result> {
   GqlRequest request;
   List<Observer<Result>> observers = [];
-  late String subscriptionId;
+  String? subscriptionId;
 
   Notifier({required this.request});
 
