@@ -25,12 +25,12 @@ class AbsintheSocket {
 
   String endpoint;
   AbsintheSocketOptions? socketOptions = AbsintheSocketOptions();
-  late PhoenixSocket _phoenixSocket;
+  PhoenixSocket? _phoenixSocket;
   PhoenixChannel? _absintheChannel;
   List<Notifier> _notifiers = [];
   List<Notifier> _queuedPushes = [];
-  late NotifierPushHandler subscriptionHandler;
-  late NotifierPushHandler unsubscriptionHandler;
+  NotifierPushHandler? subscriptionHandler;
+  NotifierPushHandler? unsubscriptionHandler;
 
   static  _onError(Map? response) {
     print("onError");
@@ -61,14 +61,16 @@ class AbsintheSocket {
 
 
   _connect() async {
-    await _phoenixSocket.connect();
-    _phoenixSocket.onMessage(_onMessage);
-    _absintheChannel = _phoenixSocket.channel("__absinthe__:control", {});
-    _absintheChannel!.join()?.receive("ok", _sendQueuedPushes);
-  }
+    if (_phoenixSocket != null) {
+      await _phoenixSocket!.connect();
+      _phoenixSocket!.onMessage(_onMessage);
+      _absintheChannel = _phoenixSocket!.channel("__absinthe__:control", {});
+      _absintheChannel!.join()?.receive("ok", _sendQueuedPushes);
+      }
+    }
 
   disconnect() {
-    _phoenixSocket.disconnect();
+    _phoenixSocket?.disconnect();
   }
 
   _sendQueuedPushes(_) {
@@ -83,12 +85,12 @@ class AbsintheSocket {
   }
 
   void unsubscribe(Notifier notifier) {
-    if (_absintheChannel != null) {
+    if (_absintheChannel != null && unsubscriptionHandler != null) {
       _handlePush(
           _absintheChannel!.push(
               event: "unsubscribe",
               payload: {"subscriptionId": notifier.subscriptionId})!,
-          _createPushHandler(unsubscriptionHandler, notifier));
+          _createPushHandler(unsubscriptionHandler!, notifier));
     }
   }
 
@@ -108,13 +110,13 @@ class AbsintheSocket {
   }
 
   _pushRequest(Notifier notifier) {
-    if (_absintheChannel == null) {
+    if (_absintheChannel == null && subscriptionHandler != null) {
       _queuedPushes.add(notifier);
     } else {
       _handlePush(
           _absintheChannel!.push(
               event: "doc", payload: {"query": notifier.request.operation})!,
-          _createPushHandler(subscriptionHandler, notifier));
+          _createPushHandler(subscriptionHandler!, notifier));
     }
   }
 
