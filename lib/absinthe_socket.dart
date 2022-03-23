@@ -38,15 +38,15 @@ class AbsintheSocket {
   }
 
   static _onSubscriptionSucceed(Notifier notifier) {
-    return (Map response) {
+    return (Map? response) {
       print("response");
       print(response.toString());
-      notifier.subscriptionId = response["subscriptionId"];
+      notifier.subscriptionId = response?["subscriptionId"];
     };
   }
 
   _onUnsubscriptionSucceed(Notifier notifier) {
-    return (Map response) {
+    return (Map? response) {
       print("unsubscription response");
       print(response.toString());
       notifier.cancel();
